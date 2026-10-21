@@ -1,0 +1,567 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>body{margin:0}[hidden]{display:none!important}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
+<title>Good Vibrations Review</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Familjen+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: clinical review tool — slim header, target tabs, level switcher, one column of question cards on an audiogram-paper ground */
+:root{
+  --paper:#f3f6f6; --surface:#ffffff; --ink:#13212a; --muted:#566872; --line:#d6dfe2; --line-strong:#9aabb2;
+  --grid:#e3eaec; --band:#eef3f4; --accent:#0e6a73; --accent-soft:#dcefef;
+  --right:#c5302b; --left:#1b5ec0; --good:#1d7a4c; --good-soft:#e1f2e8; --bad:#b0361e; --bad-soft:#f8e5df;
+  --f-display:"Familjen Grotesk","Segoe UI",system-ui,sans-serif;
+  --f-body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#0e1518; --surface:#152025; --ink:#e5edef; --muted:#93a5ac; --line:#263840; --line-strong:#4c626b;
+  --grid:#1e2d33; --band:#18262c; --accent:#53b6be; --accent-soft:#16363a;
+  --right:#f0716a; --left:#72a6f2; --good:#52c48c; --good-soft:#163a2a; --bad:#f2876e; --bad-soft:#3d221b; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#0e1518; --surface:#152025; --ink:#e5edef; --muted:#93a5ac; --line:#263840; --line-strong:#4c626b;
+  --grid:#1e2d33; --band:#18262c; --accent:#53b6be; --accent-soft:#16363a;
+  --right:#f0716a; --left:#72a6f2; --good:#52c48c; --good-soft:#163a2a; --bad:#f2876e; --bad-soft:#3d221b; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font:16px/1.55 var(--f-body);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 48px}
+.wrap{max-width:880px;margin:0 auto}
+header{padding-block:28px 8px}
+.eyebrow{font:600 12px/1 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+h1{font:700 clamp(30px,5vw,42px)/1.05 var(--f-display);margin:8px 0 10px;letter-spacing:-.01em;text-wrap:balance}
+.std{color:var(--muted);max-width:64ch;margin:0}
+.std b{color:var(--ink)}
+
+nav.lt{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:22px 0 0}
+nav.lt button{all:unset;cursor:pointer;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:6px;min-width:0}
+nav.lt button:focus-visible,.lv button:focus-visible,.btn:focus-visible,.opt:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+nav.lt button[aria-selected="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.ltk{font:600 12px/1 var(--f-mono);color:var(--accent);letter-spacing:.05em}
+.ltn{font:600 15px/1.2 var(--f-display);overflow-wrap:anywhere}
+.meter{height:5px;border-radius:3px;background:var(--grid);overflow:hidden}
+.meter i{display:block;height:100%;background:var(--accent);width:0;transition:width .3s}
+@media (max-width:620px){nav.lt{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+.lthead{margin:30px 0 14px}
+.lthead h2{font:700 26px/1.15 var(--f-display);margin:0 0 6px;text-wrap:balance}
+.lthead p{margin:0;color:var(--muted);font-style:italic;max-width:64ch}
+.lv{display:flex;flex-wrap:wrap;gap:6px;margin:16px 0 20px;padding:4px;background:var(--surface);border:1px solid var(--line);border-radius:12px;width:fit-content;max-width:100%}
+.lv button{all:unset;cursor:pointer;padding:8px 14px;border-radius:8px;font:600 14px/1.2 var(--f-display);display:flex;align-items:center;gap:8px}
+.lv button[aria-selected="true"]{background:var(--accent);color:var(--surface)}
+.lv small{font:400 12px var(--f-mono);opacity:.8}
+
+.qs{display:flex;flex-direction:column;gap:16px}
+.q{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px 22px;min-width:0}
+.q.ok{border-left:4px solid var(--good)} .q.no{border-left:4px solid var(--bad)}
+.qhead{display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap}
+.qnum{font:600 13px/1 var(--f-mono);background:var(--accent-soft);color:var(--accent);border-radius:6px;padding:5px 8px}
+.qtype{font:600 11px/1 var(--f-mono);letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.qstat{margin-left:auto;font:600 13px/1 var(--f-mono)}
+.qstat.ok{color:var(--good)} .qstat.no{color:var(--bad)}
+.prompt{margin:0 0 14px;font-size:17px;max-width:68ch}
+.fig{margin:4px 0 16px;overflow-x:auto}
+.fig svg{display:block;width:100%;height:auto;max-width:100%}
+
+.opts{display:grid;gap:8px}
+.opt{all:unset;cursor:pointer;border:1px solid var(--line);border-radius:10px;padding:11px 14px;display:flex;gap:12px;align-items:flex-start;min-width:0}
+.opt:hover:not([disabled]){border-color:var(--accent);background:var(--accent-soft)}
+.opt .k{font:600 13px/1.5 var(--f-mono);color:var(--muted);flex:none}
+.opt[disabled]{cursor:default}
+.opt.right{border-color:var(--good);background:var(--good-soft)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.fb{margin-top:12px;padding:12px 14px;border-radius:10px;background:var(--band);font-size:15px}
+.fb b{font-family:var(--f-display)}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:12px}
+.btn{all:unset;cursor:pointer;font:600 14px/1 var(--f-display);padding:11px 16px;border-radius:9px;background:var(--accent);color:var(--surface)}
+.btn.ghost{background:transparent;color:var(--accent);border:1px solid var(--line-strong)}
+.btn:hover{filter:brightness(1.08)}
+textarea,input[type=text],input[type=number],select{font:inherit;color:var(--ink);background:var(--paper);border:1px solid var(--line-strong);border-radius:8px;padding:9px 11px;max-width:100%}
+textarea{width:100%;min-height:96px;resize:vertical}
+select{padding:7px 8px}
+select.right,input.right{border-color:var(--good);box-shadow:0 0 0 2px var(--good-soft)}
+select.wrong,input.wrong{border-color:var(--bad);box-shadow:0 0 0 2px var(--bad-soft)}
+.model{margin-top:12px;border:1px dashed var(--line-strong);border-radius:10px;padding:14px}
+.model h4{margin:0 0 6px;font:600 14px var(--f-display)}
+.checks{display:grid;gap:6px;margin:10px 0 0;padding:0;list-style:none}
+.checks label{display:flex;gap:8px;align-items:flex-start}
+
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:600 12px/1.2 var(--f-mono);text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+td.num{font-variant-numeric:tabular-nums;font-family:var(--f-mono);font-size:14px}
+.fix{display:block;font-size:12.5px;color:var(--good);margin-top:4px}
+
+.order{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.order li{display:flex;gap:10px;align-items:center;border:1px solid var(--line);border-radius:10px;padding:8px 10px;min-width:0}
+.order li span.t{flex:1;min-width:0}
+.order li .pos{font:600 13px var(--f-mono);color:var(--muted);width:22px;flex:none}
+.order li.right{border-color:var(--good);background:var(--good-soft)}
+.order li.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.mv{all:unset;cursor:pointer;width:30px;height:30px;display:grid;place-items:center;border:1px solid var(--line);border-radius:7px;font-size:14px;flex:none}
+.mv:focus-visible{outline:3px solid var(--accent)}
+
+.earwrap{display:grid;gap:16px}
+.earlist{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px 16px}
+.earlist label{display:flex;gap:8px;align-items:center;min-width:0}
+.earlist label b{font:600 13px var(--f-mono);width:26px;flex:none;text-align:right}
+.earlist select{flex:1;min-width:0}
+.ear .badge circle{fill:var(--surface);stroke:var(--accent);stroke-width:1.5}
+.ear .badge.hl circle{fill:var(--accent)} .ear .badge.hl text{fill:var(--surface)}
+.ear .badge text{fill:var(--ink);font:600 12px var(--f-mono)}
+.ear .anat{fill:none;stroke:var(--line-strong);stroke-width:1.6}
+.ear .soft{stroke:var(--grid)}
+.ear .lead{stroke:var(--accent);stroke-width:1}
+.ear .rl{fill:var(--ink);font:600 13px var(--f-display)}
+.ear .cap{fill:var(--muted);font:11px var(--f-body)}
+
+.ag{font-family:var(--f-mono)}
+.ag .banda{fill:var(--band)} .ag .bandb{fill:transparent}
+.ag .aggrid{stroke:var(--grid)} .ag .agframe{fill:none;stroke:var(--line-strong);stroke-width:1.2}
+.ag .agtick{fill:var(--muted);font-size:11px} .ag .agband{fill:var(--muted);font-size:10.5px;font-family:var(--f-body)}
+.ag .aglab{fill:var(--ink);font-size:12px;font-family:var(--f-body)}
+.ag .agline{fill:none;stroke-width:1.6} .ag .agline.R{stroke:var(--right)} .ag .agline.L{stroke:var(--left)}
+.ag .sym{fill:none;stroke-width:2} .ag .sym.R{stroke:var(--right)} .ag .sym.L{stroke:var(--left)}
+.ag circle.sym{fill:var(--surface)}
+.ag .ghost{opacity:.35}
+.ag .miss{fill:none;stroke:var(--bad);stroke-width:1.5;stroke-dasharray:3 2}
+.ag[data-plot] .agclick{cursor:crosshair}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:14px;margin:0 0 6px}
+.legend span{display:inline-flex;gap:6px;align-items:center}
+.sw{font:700 16px var(--f-mono)} .sw.R{color:var(--right)} .sw.L{color:var(--left)}
+.modes{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.modes button{all:unset;cursor:pointer;border:1px solid var(--line);border-radius:8px;padding:7px 11px;font-size:14px;display:flex;gap:7px;align-items:center}
+.modes button[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);box-shadow:inset 0 0 0 1px var(--accent)}
+.modes button:focus-visible{outline:3px solid var(--accent)}
+
+.ref{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px 22px}
+.ref h3{margin:0 0 8px;font:700 18px var(--f-display)}
+.ref ul{margin:0 0 14px;padding-left:20px;display:grid;gap:4px}
+.refgrid{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:20px}
+@media (max-width:680px){.refgrid{grid-template-columns:1fr}}
+
+.explore{display:grid;gap:14px}
+.sliders{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.sliders label{display:grid;gap:4px;font-size:14px}
+.sliders output{font:600 14px var(--f-mono);color:var(--accent)}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.wavebox{background:var(--paper);border:1px solid var(--line);border-radius:10px}
+.wavebox svg{display:block;width:100%;height:auto}
+.readout{display:flex;flex-wrap:wrap;gap:8px}
+.pill{font:600 12.5px var(--f-mono);padding:5px 9px;border-radius:999px;background:var(--accent-soft);color:var(--accent)}
+
+.res{display:grid;gap:16px}
+.rescard{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px 20px}
+.rescard h3{margin:0 0 10px;font:700 18px var(--f-display)}
+.lvrow{display:grid;grid-template-columns:90px minmax(0,1fr) 64px;gap:12px;align-items:center;margin:6px 0;font-size:14px}
+.lvrow .meter{height:8px}
+.lvrow .sc{font:600 13px var(--f-mono);text-align:right;font-variant-numeric:tabular-nums}
+.rates{display:flex;flex-wrap:wrap;gap:12px;margin-top:12px;font-size:14px}
+.rates label{display:flex;gap:8px;align-items:center}
+.note{color:var(--muted);font-size:14px}
+pre.out{white-space:pre-wrap;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:12px;font:13px/1.5 var(--f-mono);margin:10px 0 0;max-width:100%;overflow-x:auto}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+<header>
+  <div class="eyebrow">PLTW Medical Interventions · Activities 1.3.1 &amp; 1.3.2</div>
+  <h1>Good Vibrations Review</h1>
+  <p class="std"><b>Standard:</b> Conduct a Rinne and Speech-in-Noise hearing assessment and match hearing case studies with audiograms. Work through each learning target from Recall to Analyze. Answers check instantly, and your progress is saved on this device.</p>
+  <nav class="lt" id="ltnav" role="tablist"></nav>
+</header>
+<main id="main"></main>
+</div>
+
+<script>
+/* ---------- state ---------- */
+const KEY='good-vibrations-review-v1';
+let S={r:{},d:{},t:{},o:{},p:{},rev:{},rate:{},name:'',view:'lt1',lvl:{}};
+try{const s=JSON.parse(localStorage.getItem(KEY)||'null'); if(s) S=Object.assign(S,s);}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* ---------- figures ---------- */
+function waveFig(){
+  const mid=150, w=(x0,len,c,a)=>Array.from({length:241},(_,i)=>`${(x0+i*len/240).toFixed(1)},${(mid-a*Math.sin(i/240*c*2*Math.PI)).toFixed(1)}`).join(' ');
+  return `<svg viewBox="0 30 760 230" role="img" aria-label="Wave A and Wave B with markers 1 and 2">
+  <line x1="60" x2="380" y1="${mid}" y2="${mid}" stroke="var(--grid)" stroke-dasharray="4 4"/>
+  <polyline points="${w(70,300,2,55)}" fill="none" stroke="var(--ink)" stroke-width="2"/>
+  <text x="220" y="240" text-anchor="middle" fill="var(--ink)" font-weight="700" font-family="var(--f-display)">Wave A</text>
+  <line x1="420" x2="736" y1="${mid}" y2="${mid}" stroke="var(--grid)" stroke-dasharray="4 4"/>
+  <polyline points="${w(430,300,6,22)}" fill="none" stroke="var(--ink)" stroke-width="2"/>
+  <text x="580" y="240" text-anchor="middle" fill="var(--ink)" font-weight="700" font-family="var(--f-display)">Wave B</text>
+  <line x1="48" x2="107" y1="95" y2="95" stroke="var(--line-strong)" stroke-dasharray="3 3"/>
+  <g stroke="var(--accent)" stroke-width="1.5"><line x1="48" x2="48" y1="95" y2="${mid}"/><line x1="43" x2="53" y1="95" y2="95"/><line x1="43" x2="53" y1="${mid}" y2="${mid}"/>
+  <line x1="107.5" x2="257.5" y1="74" y2="74"/><line x1="107.5" x2="107.5" y1="68" y2="88"/><line x1="257.5" x2="257.5" y1="68" y2="88"/></g>
+  <circle cx="26" cy="122" r="11" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.5"/><text x="26" y="126.5" text-anchor="middle" fill="var(--ink)" font-weight="700">1</text>
+  <circle cx="182.5" cy="56" r="11" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.5"/><text x="182.5" y="60.5" text-anchor="middle" fill="var(--ink)" font-weight="700">2</text>
+  </svg>`;
+}
+function earFig(){
+  const cx=540,cy=252;
+  const spiral=Array.from({length:160},(_,i)=>{const r=50-i*.26,a=Math.PI+i*.11;return `${(cx+r*Math.cos(a)).toFixed(1)},${(cy+r*Math.sin(a)).toFixed(1)}`}).join(' ');
+  const B=[[30,300,62,280],[220,160,220,200],[262,300,300,242],[316,100,328,172],[352,100,348,173],[388,100,380,210],[420,320,401,229],[330,372,392,340],[468,310,444,234],[520,340,532,293],[666,392,666,364],[712,236,690,216],[712,128,690,150],[500,100,476,126]];
+  const cells=[628,652,676,700].map(x=>`<rect x="${x}" y="332" width="12" height="18" rx="3"/><path d="M${x+2} 332V323M${x+6} 332V321M${x+10} 332V323" stroke-width="1"/>`).join('');
+  return `<svg class="ear" viewBox="0 36 760 376" role="img" aria-label="Schematic ear cross-section with 14 numbered structures">
+  <g fill="none" stroke="var(--line-strong)" stroke-width="1.25"><path d="M30 66V58H298V66"/><path d="M302 66V58H400V66"/><path d="M404 66V58H722V66"/></g>
+  <text class="rl" x="164" y="50" text-anchor="middle">A</text><text class="rl" x="351" y="50" text-anchor="middle">B</text><text class="rl" x="563" y="50" text-anchor="middle">C</text>
+  <g class="anat">
+   <path d="M96 110C52 118 38 200 60 268C74 312 104 346 132 332C150 322 140 296 136 280C132 262 146 248 150 236L150 200C150 150 136 106 96 110Z"/>
+   <path class="soft" d="M104 140C80 160 78 230 100 270"/><path d="M150 200H300M150 236H300"/>
+   <ellipse cx="302" cy="218" rx="5" ry="30" stroke-width="2"/>
+   <rect class="soft" x="308" y="160" width="92" height="116" rx="8" stroke-dasharray="4 4"/>
+   <line x1="306" y1="205" x2="326" y2="183" stroke-width="3"/><circle cx="330" cy="178" r="6"/><circle cx="348" cy="180" r="7"/>
+   <line x1="352" y1="186" x2="362" y2="208" stroke-width="3"/><path d="M362 210L396 210L396 228L362 216Z"/>
+   <ellipse cx="400" cy="219" rx="3" ry="10" stroke-width="2"/><ellipse cx="436" cy="214" rx="32" ry="22"/>
+   <ellipse cx="428" cy="150" rx="14" ry="32"/><ellipse cx="470" cy="168" rx="30" ry="14"/><ellipse cx="458" cy="134" rx="22" ry="13" transform="rotate(-30 458 134)"/>
+   <path d="M466 222L494 238"/><polyline points="${spiral}" stroke-width="2"/>
+   <line x1="466" y1="204" x2="690" y2="150" stroke-width="3"/><line x1="581" y1="240" x2="690" y2="214" stroke-width="3"/>
+   <path d="M332 276L420 388L446 380L356 276"/><rect x="610" y="300" width="112" height="64" rx="8"/><line x1="620" y1="350" x2="712" y2="350"/>${cells}
+   <line class="soft" x1="576" y1="284" x2="610" y2="312" stroke-dasharray="3 3"/>
+  </g>
+  <text class="cap" x="666" y="316" text-anchor="middle">enlarged view</text>
+  ${B.map(b=>`<line class="lead" x1="${b[0]}" y1="${b[1]}" x2="${b[2]}" y2="${b[3]}"/>`).join('')}
+  ${B.map((b,i)=>`<g class="badge" data-n="${i+1}"><circle cx="${b[0]}" cy="${b[1]}" r="11"/><text x="${b[0]}" y="${b[1]+4.5}" text-anchor="middle">${i+1}</text></g>`).join('')}
+  </svg>`;
+}
+
+/* ---------- audiograms ---------- */
+const FREQ=['250','500','1000','2000','4000','8000'];
+const BANDS=[['No loss',-10,20],['Mild',20,40],['Moderate',40,55],['Mod. to severe',55,70],['Severe',70,90],['Profound',90,120]];
+const N=null;
+const AG={
+ A:{R:{air:[5,5,10,5,10,15],bone:[N,N,N,N,N,N]},L:{air:[10,5,5,10,15,10],bone:[N,N,N,N,N,N]}},
+ B:{R:{air:[10,10,15,30,65,45],bone:[N,10,15,30,60,N]},L:{air:[15,10,20,35,70,50],bone:[N,10,20,35,65,N]}},
+ C:{R:{air:[10,5,10,5,10,10],bone:[N,N,N,N,N,N]},L:{air:[45,45,40,40,45,50],bone:[5,10,5,10,10,N]}},
+ D:{R:{air:[95,100,105,110,115,120],bone:[N,N,N,N,N,N]},L:{air:[90,95,100,105,110,115],bone:[N,N,N,N,N,N]}},
+ E:{R:{air:[30,35,45,55,65,70],bone:[N,35,45,55,65,N]},L:{air:[25,30,40,50,60,65],bone:[N,30,40,50,60,N]}}
+};
+const G={L:58,R:466,T:16,B:376}; G.cw=(G.R-G.L)/6;
+const gX=i=>G.L+G.cw*(i+.5), gY=d=>G.T+(d+10)*(G.B-G.T)/130;
+const EARN={R:'Right',L:'Left'};
+function sym(e,t,i,v,extra=''){
+  const x=gX(i),y=gY(v),tt=`<title>${EARN[e]} ear, ${t} conduction, ${FREQ[i]} Hz: ${v} dB</title>`;
+  if(t==='air') return e==='R'?`<circle class="sym R ${extra}" cx="${x}" cy="${y}" r="6.5">${tt}</circle>`
+    :`<path class="sym L ${extra}" d="M${x-6} ${y-6}L${x+6} ${y+6}M${x+6} ${y-6}L${x-6} ${y+6}">${tt}</path>`;
+  return e==='R'?`<path class="sym R ${extra}" d="M${x-6} ${y-8}L${x-16} ${y}L${x-6} ${y+8}">${tt}</path>`
+    :`<path class="sym L ${extra}" d="M${x+6} ${y-8}L${x+16} ${y}L${x+6} ${y+8}">${tt}</path>`;
+}
+function marksSVG(d,extra=''){
+  let s='';
+  ['R','L'].forEach(e=>{const pts=d[e].air.map((v,i)=>v==null?null:`${gX(i)},${gY(v)}`).filter(Boolean);
+    if(pts.length>1) s+=`<polyline class="agline ${e} ${extra}" points="${pts.join(' ')}"/>`;});
+  ['R','L'].forEach(e=>['air','bone'].forEach(t=>d[e][t].forEach((v,i)=>{if(v!=null) s+=sym(e,t,i,v,extra)})));
+  return s;
+}
+function agSVG(name,d,{plot=false,ghost=null,miss=[]}={}){
+  let s=`<svg class="ag" viewBox="0 0 560 412" role="img" aria-label="Audiogram ${name}" ${plot?'data-plot':''}>`;
+  BANDS.forEach((b,i)=>{s+=`<rect class="${i%2?'bandb':'banda'}" x="${G.L}" y="${gY(b[1])}" width="${G.R-G.L}" height="${gY(b[2])-gY(b[1])}"/><text class="agband" x="${G.R+8}" y="${(gY(b[1])+gY(b[2]))/2+4}">${b[0]}</text>`});
+  for(let v=-10;v<=120;v+=10) s+=`<line class="aggrid" x1="${G.L}" x2="${G.R}" y1="${gY(v)}" y2="${gY(v)}"/><text class="agtick" x="${G.L-6}" y="${gY(v)+4}" text-anchor="end">${v}</text>`;
+  FREQ.forEach((f,i)=>s+=`<line class="aggrid" x1="${gX(i)}" x2="${gX(i)}" y1="${G.T}" y2="${G.B}"/><text class="agtick" x="${gX(i)}" y="${G.B+16}" text-anchor="middle">${f}</text>`);
+  s+=`<rect class="agframe" x="${G.L}" y="${G.T}" width="${G.R-G.L}" height="${G.B-G.T}"/>`;
+  s+=`<text class="aglab" x="${(G.L+G.R)/2}" y="${G.B+33}" text-anchor="middle">Frequency (Hz)</text><text class="aglab" transform="translate(16 ${(G.T+G.B)/2}) rotate(-90)" text-anchor="middle">Hearing level (dB)</text>`;
+  if(ghost) s+=marksSVG(ghost,'ghost');
+  s+=marksSVG(d);
+  miss.forEach(([e,t,i,v])=>s+=`<circle class="miss" cx="${gX(i)+(t==='bone'?(e==='R'?-11:11):0)}" cy="${gY(v)}" r="13"/>`);
+  if(plot) s+=`<rect class="agclick" x="${G.L}" y="${G.T-8}" width="${G.R-G.L}" height="${G.B-G.T+16}" fill="transparent"/>`;
+  return s+'</svg>';
+}
+const LEGEND=`<div class="legend"><span><b class="sw R">O</b>Right ear, air</span><span><b class="sw L">X</b>Left ear, air</span><span><b class="sw R">&lt;</b>Right ear, bone</span><span><b class="sw L">&gt;</b>Left ear, bone</span></div>`;
+const agFig=n=>`<p style="margin:0 0 6px;font:700 16px var(--f-display)">Audiogram ${n}</p>${LEGEND}${agSVG(n,AG[n])}`;
+
+/* ---------- content ---------- */
+const EAR14=['Pinna','Auditory canal','Tympanic membrane','Malleus','Incus','Stapes','Oval window','Eustachian tube','Vestibule','Cochlea','Sensory hair cells','Cochlear nerve','Vestibular nerve','Semicircular canals'];
+const EARS=['Neither','Right only','Left only','Both'], DEG=['No hearing loss','Mild','Moderate','Moderate to severe','Severe','Profound'], TYP=['None','Conductive','Sensorineural'];
+const agRow=(n,a)=>({type:'table',prompt:`Read Audiogram ${n}. Which ear(s) show hearing loss, how much (use the worst range), and what type?`,fig:agFig(n),
+  cols:[{h:'Ear(s) with loss',o:EARS},{h:'Degree',o:DEG},{h:'Type',o:TYP}],rows:[{l:`Audiogram ${n}`,a}],explain:a[3]});
+
+const LT=[
+{key:'lt1',title:'Sound waves and the ear',target:'I can explain sound waves using frequency and amplitude and identify key structures of the ear.',levels:[
+ [ // Recall
+  {type:'mc',prompt:"A sound's pitch is determined by its:",o:['amplitude','frequency','decibel level','speed'],a:1,e:'Pitch depends on frequency: how many vibrations happen each second, measured in hertz (Hz). Higher frequency means higher pitch.'},
+  {type:'mc',prompt:'Sound intensity (loudness) is measured in:',o:['hertz (Hz)','decibels (dB)','wavelengths','vibrations per minute'],a:1,e:'Loudness is measured in decibels. The scale starts at 0 dB, the softest sound a normal ear can detect.'},
+  {type:'mc',prompt:'Which list names the ossicles in order from the eardrum inward?',o:['stapes, incus, malleus','incus, malleus, stapes','malleus, incus, stapes','malleus, stapes, incus'],a:2,e:'Hammer, anvil, stirrup: the malleus touches the eardrum, the incus is in the middle, and the stapes presses on the oval window.'},
+  {type:'mc',prompt:'Which structure connects the middle ear to the back of the nose and throat to equalize pressure?',o:['auditory canal','cochlear nerve','Eustachian tube','vestibule'],a:2,e:'The Eustachian tube opens when you yawn or swallow, letting air pressure on both sides of the eardrum match.'},
+  {type:'mc',prompt:'The semicircular canals help the body:',o:['amplify incoming sound','sense balance and changes in head position','equalize air pressure','collect sound waves'],a:1,e:'The three fluid-filled loops sense head rotation and are part of the vestibular (balance) system, not hearing.'},
+  {type:'mc',prompt:'Sensory hair cells that turn fluid movement into nerve impulses are found in the:',o:['cochlea','tympanic membrane','pinna','Eustachian tube'],a:0,e:'Hair cells line the cochlea. Fluid waves bend them, and they send impulses along the cochlear (auditory) nerve.'},
+  {type:'mc',prompt:'Which structure is part of the outer ear?',o:['stapes','oval window','pinna','cochlea'],a:2,e:'The outer ear is the pinna and the auditory canal. The stapes is middle ear; the oval window and cochlea are inner ear.'}
+ ],
+ [ // Apply
+  {type:'explore',prompt:'Sound wave explorer. Change the frequency and amplitude and watch the wave. Press Play to hear it (use headphones and start with low amplitude).'},
+  {type:'mc',prompt:'Which wave has the higher pitch?',fig:waveFig(),o:['Wave A','Wave B','They have the same pitch'],a:1,e:'Wave B fits more cycles into the same space, so it has a higher frequency, and higher frequency means higher pitch.'},
+  {type:'mc',prompt:'Which wave would sound louder?',fig:waveFig(),o:['Wave A','Wave B','They are equally loud'],a:0,e:'Wave A is taller. Greater amplitude means more energy in the wave, which we hear as a louder sound.'},
+  {type:'mc',prompt:'What does marker 1 on Wave A show?',fig:waveFig(),o:['Amplitude','One complete wave cycle','Pitch in hertz','Decibel threshold'],a:0,e:'Marker 1 runs from the resting line up to the peak. That height is the amplitude.'},
+  {type:'mc',prompt:'What does marker 2 on Wave A show?',fig:waveFig(),o:['Amplitude','One complete wave cycle (wavelength)','The eardrum vibrating','Loudness in decibels'],a:1,e:'Marker 2 spans peak to peak, one full cycle. The more cycles per second, the higher the frequency.'},
+  {type:'ear',prompt:'Label the ear. Choose the region for A, B, and C, then name each numbered structure. Focus a menu to highlight its number on the diagram.'},
+  {type:'table',prompt:'Match each function to the structure that performs it.',cols:[{h:'Structure',o:['Pinna','Tympanic membrane','Incus','Stapes','Eustachian tube','Cochlea','Semicircular canals','Cochlear nerve']}],
+   rows:[{l:'Gathers sound waves and funnels them into the ear canal',a:['Pinna']},{l:'Vibrates when sound waves strike it',a:['Tympanic membrane']},{l:'Pushes in and out against the oval window',a:['Stapes']},{l:'Equalizes pressure between the middle ear and the throat',a:['Eustachian tube']},{l:'Holds the hair cells that turn fluid motion into impulses',a:['Cochlea']},{l:'Senses head rotation for balance',a:['Semicircular canals']},{l:'Carries hearing impulses to the brain',a:['Cochlear nerve']}]},
+  {type:'short',prompt:'Explain how sound travels through the air. Use the words vibration and molecules.',model:'A vibrating object pushes on the air molecules next to it. Those molecules bump into their neighbors, which bump into theirs, passing the vibration along as a wave. The energy travels to your ear, while each molecule only moves back and forth.',pts:['A vibrating object pushes nearby air molecules','Molecules bump into neighboring molecules','The energy moves as a wave','Each molecule moves back and forth; it does not travel across the room']},
+  {type:'num',prompt:'A whisper is about 40 dB. On the logarithmic decibel scale, how many times more intense is a 60 dB conversation?',a:100,unit:'times',e:'Each 10 dB step is 10 times more intense. 60 − 40 = 20 dB, which is two steps: 10 × 10 = 100 times.'}
+ ],
+ [ // Analyze
+  {type:'order',prompt:'Put the steps of hearing in order, from sound entering the ear to the brain.',items:['Sound waves travel through the auditory canal and vibrate the eardrum','The ossicles move back and forth','The stapes moves in and out against the oval window','Fluid inside the cochlea moves','Hair cells bend and send an impulse along the auditory nerve','The brain interprets the impulse as sound'],seed:[3,0,5,2,4,1]},
+  {type:'mc',prompt:'A patient’s ossicles fuse together and can no longer move. Which statement is true?',o:['Air conduction is affected more than bone conduction','Bone conduction is affected more than air conduction','Both are affected equally','Neither is affected because the cochlea still works'],a:0,e:'Air-conducted sound must pass through the moving ossicles. Bone conduction vibrates the skull and cochlea directly, skipping the middle ear. This is a conductive hearing loss.'},
+  {type:'short',prompt:'Using the fused-ossicles patient above, explain which steps of hearing fail and why bone conduction would still work.',model:'The ossicle step and the stapes/oval window step fail, so the cochlear fluid barely moves when sound comes through the air. Bone conduction vibrates the skull, which moves the cochlear fluid directly and bypasses the middle ear, so hearing through bone stays near normal.',pts:['Ossicles cannot pass vibrations to the oval window','Cochlear fluid barely moves from air-conducted sound','Bone conduction moves the cochlea directly, bypassing the middle ear','Names it as a conductive hearing loss']},
+  {type:'mc',prompt:'Frequent exposure to sounds above 85 dB can cause permanent hearing loss. Which structure is most likely damaged by years of loud music?',o:['The pinna','The tympanic membrane','The sensory hair cells in the cochlea','The Eustachian tube'],a:2,e:'Loud sound over-bends and destroys hair cells. Human hair cells do not grow back, so the result is a permanent sensorineural hearing loss.'}
+ ]
+]},
+{key:'lt2',title:'Hearing tests',target:'I can define, explain, and implement different types of hearing tests (Rinne, Speech-in-Noise, and pure tone).',levels:[
+ [
+  {type:'mc',prompt:'The Rinne Test in this activity uses a tuning fork that vibrates at:',o:['256 Hz','512 Hz','1,000 Hz','8,000 Hz'],a:1,e:'The activity uses a 512 Hz tuning fork, struck on the wrist or the sole of a shoe.'},
+  {type:'mc',prompt:'When the tuning fork handle is pressed against the mastoid process, the subject hears the sound through:',o:['air conduction','bone conduction','the Eustachian tube','the vestibular nerve'],a:1,e:'The vibration travels through the skull bone straight to the cochlea. That is bone conduction.'},
+  {type:'mc',prompt:'The mastoid process is located:',o:['inside the auditory canal','directly behind the bottom of the earlobe','in front of the ear at the jaw joint','on top of the head'],a:1,e:'It is the bony bump behind the bottom of the earlobe.'},
+  {type:'mc',prompt:'In a person with no hearing loss, air conduction is heard about:',o:['half as long as bone conduction','the same length as bone conduction','twice as long as bone conduction','ten times as long as bone conduction'],a:2,e:'Normal: air conduction lasts about twice as long. Example: 20 s by bone, 40 s by air.'},
+  {type:'mc',prompt:'In a pure tone test, the threshold is the:',o:['loudest sound a person can tolerate','softest sound a person can hear at a given frequency','highest frequency a person can hear','point where tinnitus begins'],a:1,e:'The tone gets softer until the subject stops responding. The softest level heard is the threshold for that frequency.'},
+  {type:'mc',prompt:'A Speech-in-Noise Test is most useful for revealing difficulty that is common with:',o:['conductive hearing loss','sensorineural hearing loss','a blocked Eustachian tube','balance disorders'],a:1,e:'People with sensorineural loss often struggle to understand speech when there is background noise.'},
+  {type:'mc',prompt:'A pure tone test checks frequencies from about:',o:['20 Hz to 200 Hz','250 Hz to 8,000 Hz','10,000 Hz to 20,000 Hz','0 dB to 120 dB'],a:1,e:'Thresholds are tested from 250 Hz to 8,000 Hz, the range that matters most for speech.'},
+  {type:'table',prompt:'Match each test to what it measures.',cols:[{h:'What it measures',o:['How long a tone is heard through bone compared with air','How well a person understands words with background noise','The softest tone heard at each frequency, recorded on an audiogram']}],
+   rows:[{l:'Rinne Test',a:['How long a tone is heard through bone compared with air']},{l:'Speech-in-Noise Test',a:['How well a person understands words with background noise']},{l:'Pure Tone Test',a:['The softest tone heard at each frequency, recorded on an audiogram']}]}
+ ],
+ [
+  {type:'order',prompt:'Put the Rinne Test steps in order.',items:['Strike the tuning fork on your wrist or the sole of your shoe','Place the handle on the mastoid process, prongs pointing down and away, and start the stopwatch','Ask the subject to signal when the sound stops; record the bone conduction time','Immediately move the fork so the prongs point into the ear and resume timing','Ask the subject to signal when the sound stops; record the air conduction time','Repeat with the other ear, then switch roles'],seed:[2,0,5,1,3,4]},
+  {type:'table',prompt:'Four students completed the Rinne Test. Decide whether each ear is normal or shows possible conductive loss.',
+   fig:`<div class="tbl"><table><thead><tr><th>Subject</th><th>Left BC (s)</th><th>Left AC (s)</th><th>Right BC (s)</th><th>Right AC (s)</th></tr></thead><tbody>
+   <tr><td>1</td><td class="num">16</td><td class="num">34</td><td class="num">15</td><td class="num">31</td></tr>
+   <tr><td>2</td><td class="num">24</td><td class="num">17</td><td class="num">14</td><td class="num">30</td></tr>
+   <tr><td>3</td><td class="num">20</td><td class="num">21</td><td class="num">22</td><td class="num">22</td></tr>
+   <tr><td>4</td><td class="num">12</td><td class="num">26</td><td class="num">19</td><td class="num">19</td></tr></tbody></table></div>
+   <p class="note">BC = bone conduction, AC = air conduction. Normal: AC is about twice BC. Conductive: BC is longer than or equal to AC.</p>`,
+   cols:[{h:'Left ear',o:['Normal','Possible conductive loss']},{h:'Right ear',o:['Normal','Possible conductive loss']}],
+   rows:[{l:'Subject 1',a:['Normal','Normal']},{l:'Subject 2',a:['Possible conductive loss','Normal']},{l:'Subject 3',a:['Possible conductive loss','Possible conductive loss']},{l:'Subject 4',a:['Normal','Possible conductive loss']}]},
+  {type:'short',prompt:'Why would a person with conductive hearing loss hear the tuning fork through bone conduction longer than, or as long as, through air conduction? Name the region of the ear involved.',model:'A problem in the outer or middle ear, such as fluid, wax, or stiff ossicles, blocks sound traveling through air. Bone conduction vibrates the skull and cochlea directly and skips the blocked area. Because the cochlea still works, the bone-conducted tone is heard as long or longer.',pts:['Names the outer or middle ear as the problem area','Air-conducted sound is blocked before it reaches the cochlea','Bone conduction bypasses the blockage','The inner ear (cochlea) still works normally']}
+ ],
+ [
+  {type:'mc',prompt:'Jordan’s Rinne results show air conduction about twice as long as bone conduction in both ears, but Jordan misses many words on the Speech-in-Noise Test. What type of hearing loss might Jordan have?',o:['Conductive','Sensorineural','No hearing loss is possible','A balance disorder'],a:1,e:'In sensorineural loss, air and bone conduction drop together, so the Rinne can still look normal. Trouble with speech in noise is a common sign.'},
+  {type:'mc',prompt:'Which test should Jordan have next?',o:['Repeat the Rinne Test','A pure tone audiogram with an audiologist','A Speech-in-Noise Test in a quiet room','No more testing is needed'],a:1,e:'A pure tone audiogram measures thresholds at each frequency and shows the type and degree of loss.'},
+  {type:'mc',prompt:'A tester waits 10 seconds after removing the fork from the mastoid process before holding it next to the ear. What false conclusion could result?',o:['The subject appears to have normal hearing','The subject appears to have conductive hearing loss','The subject appears to have tinnitus','Nothing changes'],a:1,e:'The fork fades during the delay, so the air conduction time comes out too short. AC may look equal to or shorter than BC, which looks like conductive loss.'},
+  {type:'short',prompt:'The Speech-in-Noise Test uses a constant whooshing sound that can simulate tinnitus. Describe two ways constant ringing or buzzing would affect a student’s school day, and explain why testing speech in noise matters.',model:'A student with tinnitus might struggle to hear the teacher or classmates in a noisy room, and might have trouble concentrating, feel tired, or sleep poorly. Daily life is full of background noise, so testing only in a quiet booth misses how a person actually hears.',pts:['Gives a first realistic effect on the school day','Gives a second realistic effect','Explains that everyday life has background noise','Says quiet-only testing can miss real-world hearing problems']}
+ ]
+]},
+{key:'lt3',title:'Audiograms and interventions',target:'I can analyze audiograms to identify potential hearing losses of an individual and possible medical interventions.',levels:[
+ [
+  {type:'ref'},
+  {type:'mc',prompt:'On an audiogram, right-ear air conduction is shown as a:',o:['blue X','red O','<','>'],a:1,e:'Right = red O. Left = blue X. Bone conduction uses < (right) and > (left).'},
+  {type:'mc',prompt:'A threshold of 60 dB falls in which range?',o:['Mild','Moderate','Moderate to severe','Severe'],a:2,e:'Moderate to severe covers 56–70 dB.'},
+  {type:'mc',prompt:'A patient’s marks sit near the bottom of the audiogram. This means the patient:',o:['hears better at those frequencies','needs louder sounds to hear, so has more hearing loss','hears higher pitches','has a balance problem'],a:1,e:'0 dB is at the top. The lower the mark, the louder the tone had to be before it was heard.'},
+  {type:'mc',prompt:'Conductive hearing loss is shown when bone conduction is at least ____ better than air conduction.',o:['5 dB','10 dB','40 dB','90 dB'],a:1,e:'An air–bone gap of 10 dB or more points to a problem in the outer or middle ear.'},
+  {type:'mc',prompt:'A cochlear implant helps patients with severe to profound sensorineural loss because it:',o:['makes sounds louder in the ear canal','drains fluid from the middle ear','bypasses damaged hair cells and stimulates the auditory nerve directly','replaces the ossicles'],a:2,e:'Electrodes in the cochlea send signals straight to the auditory nerve, skipping the damaged hair cells.'}
+ ],
+ [
+  agRow('A',['Neither','No hearing loss','None','All thresholds are 5–15 dB in both ears, inside the 0–20 dB normal range.']),
+  agRow('B',['Both','Moderate to severe','Sensorineural','Bone matches air (no air–bone gap). Lows are normal with a dip at 4,000 Hz, down to 70 dB in the left ear. This notch is typical of noise exposure.']),
+  agRow('C',['Left only','Moderate','Conductive','The right ear is normal. Left air is 40–50 dB, but left bone is 5–10 dB, an air–bone gap of 30 dB or more.']),
+  agRow('D',['Both','Profound','Sensorineural','Every threshold is 90 dB or worse. Conductive loss alone rarely goes past about 60 dB, so this is sensorineural.']),
+  {type:'mc',prompt:'Look back at Audiogram B. Which speech sounds would this patient most likely have trouble hearing?',o:['Vowels such as a and o','Middle sounds such as l, m, and n','High-pitched sounds such as s, f, and th','All speech sounds equally'],a:2,e:'B’s worst hearing is at 4,000 Hz, where high-pitched consonants like s, f, th, and sh live.'},
+  {type:'num',prompt:'Look back at Audiogram C. What is the air–bone gap in the left ear at 1,000 Hz?',a:35,unit:'dB',e:'Left air at 1,000 Hz is 40 dB and left bone is 5 dB. 40 − 5 = 35 dB, far more than the 10 dB that signals conductive loss.'},
+  {type:'table',prompt:'Match each patient to Audiogram A, B, C, or D.',cols:[{h:'Audiogram',o:['A','B','C','D']}],
+   rows:[{l:'W: 58-year-old factory worker; 30 years near loud machinery without ear protection; struggles to follow conversation in restaurants',a:['B']},{l:'X: 6-year-old with repeated left ear infections; the doctor sees fluid behind the left eardrum',a:['C']},{l:'Y: 16-year-old who recovered from bacterial meningitis; does not respond even to very loud sounds',a:['D']},{l:'Z: 15-year-old at a routine school screening with no complaints',a:['A']}]}
+ ],
+ [
+  {type:'plot',prompt:'Plot this patient’s results on Audiogram E. Pick a symbol, then click the grid at the right frequency and level. Click a mark again to remove it. Air marks connect automatically.'},
+  {type:'table',prompt:'Using your plotted Audiogram E, identify the hearing loss.',cols:[{h:'Ear(s) with loss',o:EARS},{h:'Degree (worst range)',o:DEG},{h:'Type',o:TYP}],rows:[{l:'Audiogram E',a:['Both','Moderate to severe','Sensorineural']}],explain:'Bone equals air at every frequency (no gap), so the loss is sensorineural. It slopes from mild at low pitches to 70 dB at 8,000 Hz in the right ear.'},
+  {type:'mc',prompt:'Which intervention best fits the patient in Audiogram E?',o:['Ear tubes to drain fluid','Hearing aids in both ears','Cochlear implant in both ears','No intervention needed'],a:1,e:'Mild to moderate-to-severe sensorineural loss leaves usable hearing, so hearing aids that amplify the weaker high frequencies are the first choice.'},
+  {type:'short',prompt:'Vowels are low in pitch, consonants such as l, m, and n are in the middle range, and sounds such as s and f are high. How would speech understanding be affected for a person with moderate to severe high-frequency sensorineural hearing loss?',model:'The person still hears vowels, so speech seems loud enough but unclear. High consonants such as s, f, and th are lost, so words like sit, fit, and ship get confused, especially with background noise. The person may feel that others are mumbling.',pts:['Vowels (low pitch) are still heard','High consonants such as s, f, th are missed','Speech sounds loud enough but unclear','Similar words get confused, worse in noise']},
+  {type:'table',prompt:'Recommend the most appropriate intervention for each patient.',cols:[{h:'Intervention',o:['Hearing aids','Medical treatment or ear tubes','Cochlear implant','No intervention needed']}],
+   rows:[{l:'W: moderate to severe sensorineural loss from noise (Audiogram B)',a:['Hearing aids']},{l:'X: conductive loss from fluid behind the left eardrum (Audiogram C)',a:['Medical treatment or ear tubes']},{l:'Y: profound sensorineural loss after meningitis (Audiogram D)',a:['Cochlear implant']}]},
+  {type:'mc',prompt:'Why would a cochlear implant not be the first choice for Patient X?',o:['X is too young for any treatment','X’s cochlea works normally and the middle ear problem can be treated without major surgery','Cochlear implants only work for the right ear','X has profound hearing loss'],a:1,e:'The problem is fluid in the middle ear. Antibiotics or ear tubes usually restore hearing, so implant surgery is not needed.'},
+  {type:'short',prompt:'Sue Smith recovered from bacterial meningitis. Predict the type of hearing loss she is most at risk for and the ear structure involved. Then list two steps Sue should take to protect her hearing.',model:'Sue is most at risk for sensorineural hearing loss, because meningitis can damage the cochlea’s hair cells or the auditory nerve. She should get regular hearing checks with an audiologist, keep headphone volume moderate and limit listening time, and wear earplugs at concerts or other loud events.',pts:['Predicts sensorineural hearing loss','Names the cochlea/hair cells or auditory nerve','Gives a first protection step','Gives a second protection step']}
+ ]
+]}
+];
+const LVN=['Recall','Apply','Analyze'];
+LT.forEach((lt,li)=>lt.levels.forEach((qs,vi)=>{let n=0;qs.forEach((q,qi)=>{q.id=`${lt.key}-${vi}-${qi}`;q.lt=li;q.lv=vi;if(!['explore','ref'].includes(q.type)){n++;q.n=n}})}));
+
+/* ---------- scoring ---------- */
+function maxOf(q){if(q.type==='table')return q.rows.reduce((s,r)=>s+r.a.length,0); if(q.type==='ear')return 17; if(q.type==='plot')return 20; return 1}
+function lvScore(li,vi){let s=0,m=0,done=0,tot=0;LT[li].levels[vi].forEach(q=>{if(q.n==null)return;tot++;m+=maxOf(q);const r=S.r[q.id];if(r){done++;s+=r.score}});return {s,m,done,tot}}
+function ltScore(li){let s=0,m=0;[0,1,2].forEach(v=>{const x=lvScore(li,v);s+=x.s;m+=x.m});return {s,m}}
+
+/* ---------- nav ---------- */
+function renderNav(){
+  const nav=document.getElementById('ltnav');
+  nav.innerHTML=LT.map((lt,i)=>{const x=ltScore(i);return `<button role="tab" aria-selected="${S.view===lt.key}" data-v="${lt.key}"><span class="ltk">LT${i+1}</span><span class="ltn">${lt.title}</span><span class="meter"><i style="width:${(x.s/x.m*100).toFixed(0)}%"></i></span></button>`}).join('')+
+   `<button role="tab" aria-selected="${S.view==='results'}" data-v="results"><span class="ltk">REPORT</span><span class="ltn">My results</span><span class="meter"><i style="width:${(LT.reduce((a,_,i)=>a+ltScore(i).s,0)/LT.reduce((a,_,i)=>a+ltScore(i).m,0)*100).toFixed(0)}%"></i></span></button>`;
+  nav.querySelectorAll('button').forEach(b=>b.onclick=()=>{S.view=b.dataset.v;save();render();try{history.replaceState(null,'','#'+S.view)}catch(e){}});
+}
+function render(){renderNav();const m=document.getElementById('main');m.innerHTML='';if(S.view==='results')return renderResults(m);
+  const li=LT.findIndex(l=>l.key===S.view);const lt=LT[li<0?0:li];const L=li<0?0:li;const vi=S.lvl[lt.key]||0;
+  m.insertAdjacentHTML('beforeend',`<div class="lthead"><div class="eyebrow">Learning target ${L+1}</div><h2>${lt.title}</h2><p>${lt.target}</p></div>`);
+  const lv=document.createElement('div');lv.className='lv';lv.setAttribute('role','tablist');
+  lv.innerHTML=LVN.map((n,i)=>{const x=lvScore(L,i);return `<button role="tab" aria-selected="${i===vi}" data-i="${i}">Level ${i+1} · ${n}<small>${x.done}/${x.tot}</small></button>`}).join('');
+  lv.querySelectorAll('button').forEach(b=>b.onclick=()=>{S.lvl[lt.key]=+b.dataset.i;save();render()});
+  m.appendChild(lv);
+  const qs=document.createElement('div');qs.className='qs';m.appendChild(qs);
+  lt.levels[vi].forEach(q=>qs.appendChild(card(q)));
+  if(vi<2){const nx=document.createElement('div');nx.className='row';nx.innerHTML=`<button class="btn ghost" id="next-${lt.key}">Go to Level ${vi+2} · ${LVN[vi+1]}</button>`;nx.firstChild.onclick=()=>{S.lvl[lt.key]=vi+1;save();render();window.scrollTo(0,0)};m.appendChild(nx)}
+}
+function refreshHead(){renderNav();document.querySelectorAll('.lv button').forEach(b=>{const li=LT.findIndex(l=>l.key===S.view);const x=lvScore(li,+b.dataset.i);b.querySelector('small').textContent=`${x.done}/${x.tot}`})}
+
+/* ---------- cards ---------- */
+const TL={mc:'Multiple choice',short:'Short answer',num:'Calculate',order:'Sequence',table:'Match',ear:'Diagram',plot:'Plot an audiogram',explore:'Explore'};
+function card(q){const el=document.createElement('article');el.className='q';el.id='q-'+q.id;fill(el,q);return el}
+function head(q){const r=S.r[q.id];const m=maxOf(q);let st='';if(r){st=r.score===m?`<span class="qstat ok">Correct${m>1?` ${r.score}/${m}`:''}</span>`:`<span class="qstat no">${m>1?`${r.score}/${m}`:(q.type==='short'?'Review again':'Not yet')}</span>`}
+  return `<div class="qhead">${q.n?`<span class="qnum">Q${q.n}</span>`:''}<span class="qtype">${TL[q.type]||''}</span>${st}</div><p class="prompt">${q.prompt}</p>${q.fig?`<div class="fig">${q.fig}</div>`:''}`}
+function done(el,q){const r=S.r[q.id];el.classList.toggle('ok',!!r&&r.score===maxOf(q));el.classList.toggle('no',!!r&&r.score<maxOf(q));save();refreshHead()}
+function retryBtn(q){return `<button class="btn ghost" data-retry>Try again</button>`}
+function wireRetry(el,q){const b=el.querySelector('[data-retry]');if(b)b.onclick=()=>{delete S.r[q.id];if(q.type==='short')delete S.rev[q.id];fill(el,q);done(el,q)}}
+
+function fill(el,q){
+  const r=S.r[q.id];
+  if(q.type==='ref'){el.className='ref';el.innerHTML=REF;return}
+  if(q.type==='explore'){el.innerHTML=head(q)+EXPLORE;wireExplore(el);return}
+  let b='';
+  if(q.type==='mc'){
+    b=`<div class="opts">${q.o.map((o,i)=>{let c='';if(r){if(i===q.a)c='right';else if(i===r.v)c='wrong'}return `<button class="opt ${c}" data-i="${i}" ${r?'disabled':''}><span class="k">${'ABCD'[i]}</span><span>${o}</span></button>`}).join('')}</div>`;
+    if(r) b+=`<div class="fb"><b>${r.score?'Correct.':'Not quite.'}</b> ${q.e}</div><div class="row">${retryBtn(q)}</div>`;
+  }
+  if(q.type==='num'){
+    b=`<div class="row" style="margin-top:0"><input type="number" id="in-${q.id}" value="${r?r.v:(S.d[q.id]||'')}" ${r?'disabled':''} class="${r?(r.score?'right':'wrong'):''}" style="width:140px"> <span>${q.unit}</span>${r?'':`<button class="btn" data-check>Check</button>`}</div>`;
+    if(r) b+=`<div class="fb"><b>${r.score?'Correct.':`Not quite. The answer is ${q.a} ${q.unit}.`}</b> ${q.e}</div><div class="row">${retryBtn(q)}</div>`;
+  }
+  if(q.type==='short'){
+    const rev=S.rev[q.id];
+    b=`<textarea id="ta-${q.id}" placeholder="Type your answer here, then compare it with the model answer.">${esc(S.d[q.id]||'')}</textarea>`;
+    if(!rev) b+=`<div class="row"><button class="btn" data-reveal>Compare with model answer</button></div>`;
+    else{b+=`<div class="model"><h4>Model answer</h4><p style="margin:0">${q.model}</p><h4 style="margin-top:12px">Did your answer include…</h4><ul class="checks">${q.pts.map((p,i)=>`<li><label><input type="checkbox" id="ck-${q.id}-${i}" ${(S.t[q.id]||[])[i]?'checked':''}> ${p}</label></li>`).join('')}</ul>
+      ${r?`<div class="row">${retryBtn(q)}</div>`:`<div class="row"><button class="btn" data-self="1">I got it</button><button class="btn ghost" data-self="0">I need to review this</button></div>`}</div>`}
+  }
+  if(q.type==='order'){
+    if(!S.o[q.id]) S.o[q.id]=q.seed.slice();
+    const ord=S.o[q.id];
+    b=`<ol class="order">${ord.map((it,p)=>{let c='';if(r)c=it===p?'right':'wrong';return `<li class="${c}"><span class="pos">${p+1}</span><span class="t">${q.items[it]}${r&&it!==p?`<span class="fix">Belongs in position ${it+1}</span>`:''}</span>${r?'':`<button class="mv" data-up="${p}" aria-label="Move up" ${p===0?'disabled':''}>↑</button><button class="mv" data-dn="${p}" aria-label="Move down" ${p===ord.length-1?'disabled':''}>↓</button>`}</li>`}).join('')}</ol>`;
+    b+=`<div class="row">${r?retryBtn(q):`<button class="btn" data-check>Check order</button>`}</div>`;
+  }
+  if(q.type==='table'){
+    const v=S.t[q.id]||[];
+    b=`<div class="tbl"><table><thead><tr><th></th>${q.cols.map(c=>`<th>${c.h}</th>`).join('')}</tr></thead><tbody>${q.rows.map((row,ri)=>`<tr><td>${row.l}</td>${q.cols.map((c,ci)=>{const val=(v[ri]||[])[ci]||'';let cls='';if(r)cls=val===row.a[ci]?'right':'wrong';
+      return `<td><select id="s-${q.id}-${ri}-${ci}" data-r="${ri}" data-c="${ci}" class="${cls}" ${r?'disabled':''}><option value="">Choose…</option>${c.o.map(o=>`<option ${o===val?'selected':''}>${o}</option>`).join('')}</select>${r&&val!==row.a[ci]?`<span class="fix">${row.a[ci]}</span>`:''}</td>`}).join('')}</tr>`).join('')}</tbody></table></div>`;
+    if(r&&q.explain) b+=`<div class="fb">${q.explain}</div>`;
+    b+=`<div class="row">${r?retryBtn(q):`<button class="btn" data-check>Check</button>`}</div>`;
+  }
+  if(q.type==='ear') b=earBody(q,r);
+  if(q.type==='plot') b=plotBody(q,r);
+  el.innerHTML=head(q)+b;
+  wire(el,q);done(el,q);
+}
+
+function wire(el,q){
+  wireRetry(el,q);
+  if(q.type==='mc') el.querySelectorAll('.opt').forEach(o=>o.onclick=()=>{const i=+o.dataset.i;S.r[q.id]={score:i===q.a?1:0,v:i};fill(el,q)});
+  if(q.type==='num'){const inp=el.querySelector('input');inp.oninput=()=>{S.d[q.id]=inp.value;save()};const c=el.querySelector('[data-check]');
+    const go=()=>{if(inp.value==='')return inp.focus();const v=parseFloat(inp.value);S.r[q.id]={score:Math.abs(v-q.a)<.01?1:0,v};fill(el,q)};
+    if(c){c.onclick=go;inp.onkeydown=e=>{if(e.key==='Enter')go()}}}
+  if(q.type==='short'){const ta=el.querySelector('textarea');ta.oninput=()=>{S.d[q.id]=ta.value;save()};
+    const rv=el.querySelector('[data-reveal]');if(rv)rv.onclick=()=>{S.rev[q.id]=1;fill(el,q)};
+    el.querySelectorAll('.checks input').forEach((c,i)=>c.onchange=()=>{const a=S.t[q.id]||[];a[i]=c.checked;S.t[q.id]=a;save()});
+    el.querySelectorAll('[data-self]').forEach(b=>b.onclick=()=>{S.r[q.id]={score:+b.dataset.self};fill(el,q)})}
+  if(q.type==='order'){const o=S.o[q.id];
+    el.querySelectorAll('[data-up]').forEach(b=>b.onclick=()=>{const p=+b.dataset.up;[o[p-1],o[p]]=[o[p],o[p-1]];save();fill(el,q);el.querySelector(`[data-up="${p-1}"]`)?.focus()});
+    el.querySelectorAll('[data-dn]').forEach(b=>b.onclick=()=>{const p=+b.dataset.dn;[o[p+1],o[p]]=[o[p],o[p+1]];save();fill(el,q);el.querySelector(`[data-dn="${p+1}"]`)?.focus()});
+    const c=el.querySelector('[data-check]');if(c)c.onclick=()=>{S.r[q.id]={score:o.every((v,i)=>v===i)?1:0};fill(el,q)}}
+  if(q.type==='table'){el.querySelectorAll('select').forEach(s=>s.onchange=()=>{const v=S.t[q.id]||[];const ri=+s.dataset.r;v[ri]=v[ri]||[];v[ri][+s.dataset.c]=s.value;S.t[q.id]=v;save()});
+    const c=el.querySelector('[data-check]');if(c)c.onclick=()=>{const v=S.t[q.id]||[];let sc=0;q.rows.forEach((row,ri)=>row.a.forEach((a,ci)=>{if((v[ri]||[])[ci]===a)sc++}));S.r[q.id]={score:sc};fill(el,q)}}
+  if(q.type==='ear') wireEar(el,q);
+  if(q.type==='plot') wirePlot(el,q);
+}
+
+/* ---------- ear labeling ---------- */
+const REG=['Outer ear','Middle ear','Inner ear'];
+function earBody(q,r){const v=S.t[q.id]||{};const opt=(list,val)=>`<option value="">Choose…</option>${list.map(o=>`<option ${o===val?'selected':''}>${o}</option>`).join('')}`;
+  const sorted=EAR14.slice().sort();
+  const field=(key,label,list,ans)=>{const val=v[key]||'';const cls=r?(val===ans?'right':'wrong'):'';return `<label><b>${label}</b><select id="e-${q.id}-${key}" data-k="${key}" class="${cls}" ${r?'disabled':''}>${opt(list,val)}</select></label>${r&&val!==ans?`<span class="fix" style="margin:-4px 0 4px 34px">${ans}</span>`:''}`};
+  return `<div class="earwrap"><div class="fig" style="margin:0">${earFig()}</div>
+   <div class="earlist">${['A','B','C'].map((k,i)=>`<div>${field('r'+k,k,REG,REG[i])}</div>`).join('')}</div>
+   <div class="earlist">${EAR14.map((a,i)=>`<div>${field('n'+(i+1),i+1,sorted,a)}</div>`).join('')}</div></div>
+   <div class="row">${r?retryBtn(q):`<button class="btn" data-check>Check labels</button>`}</div>`}
+function wireEar(el,q){el.querySelectorAll('select').forEach(s=>{const k=s.dataset.k;
+   const hl=on=>{if(k[0]!=='n')return;el.querySelector(`.badge[data-n="${k.slice(1)}"]`)?.classList.toggle('hl',on)};
+   s.onfocus=()=>hl(true);s.onblur=()=>hl(false);s.onmouseenter=()=>hl(true);s.onmouseleave=()=>{if(document.activeElement!==s)hl(false)};
+   s.onchange=()=>{const v=S.t[q.id]||{};v[k]=s.value;S.t[q.id]=v;save()}});
+  const c=el.querySelector('[data-check]');if(c)c.onclick=()=>{const v=S.t[q.id]||{};let sc=0;['A','B','C'].forEach((k,i)=>{if(v['r'+k]===REG[i])sc++});EAR14.forEach((a,i)=>{if(v['n'+(i+1)]===a)sc++});S.r[q.id]={score:sc};fill(el,q)}}
+
+/* ---------- plotting ---------- */
+const MODES=[['R','air','O','Right ear, air'],['L','air','X','Left ear, air'],['R','bone','<','Right ear, bone'],['L','bone','>','Left ear, bone']];
+const blank=()=>({R:{air:Array(6).fill(N),bone:Array(6).fill(N)},L:{air:Array(6).fill(N),bone:Array(6).fill(N)}});
+const E=AG.E;
+const EDATA=`<div class="tbl"><table><thead><tr><th>Frequency (Hz)</th><th>Right air</th><th>Right bone</th><th>Left air</th><th>Left bone</th></tr></thead><tbody>${FREQ.map((f,i)=>`<tr><td class="num">${f}</td>${[E.R.air[i],E.R.bone[i],E.L.air[i],E.L.bone[i]].map(v=>`<td class="num">${v==null?'—':v+' dB'}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+function plotBody(q,r){const P=S.p[q.id]||(S.p[q.id]=blank());const mode=S.d[q.id+'-mode']||0;let miss=[];
+  if(r){['R','L'].forEach(e=>['air','bone'].forEach(t=>E[e][t].forEach((v,i)=>{if(v!=null&&P[e][t][i]!==v)miss.push([e,t,i,v])})))}
+  return `${EDATA}<div style="height:14px"></div>
+   ${r?'':`<div class="modes" role="group" aria-label="Symbol to place">${MODES.map((m,i)=>`<button aria-pressed="${i===+mode}" data-m="${i}"><b class="sw ${m[0]}">${esc(m[2])}</b>${m[3]}</button>`).join('')}</div>`}
+   <div class="fig" style="margin:0">${agSVG('E',P,{plot:!r,ghost:r&&S.d[q.id+'-show']?E:null,miss})}</div>
+   ${r?`<div class="fb"><b>${r.score}/20 marks correct.</b> ${r.score===20?'Every mark is in the right place.':'Dashed red rings show where the missing or misplaced marks belong.'}</div>`:''}
+   <div class="row">${r?`${retryBtn(q)}<button class="btn ghost" data-show>${S.d[q.id+'-show']?'Hide':'Show'} correct audiogram</button>`:`<button class="btn" data-check>Check my audiogram</button><button class="btn ghost" data-clear>Clear</button>`}</div>`}
+function wirePlot(el,q){const P=S.p[q.id];
+  el.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{S.d[q.id+'-mode']=+b.dataset.m;save();fill(el,q)});
+  const svg=el.querySelector('svg.ag[data-plot]');
+  if(svg) svg.addEventListener('click',ev=>{const pt=svg.createSVGPoint();pt.x=ev.clientX;pt.y=ev.clientY;const p=pt.matrixTransform(svg.getScreenCTM().inverse());
+    if(p.x<G.L||p.x>G.R)return;const i=Math.min(5,Math.max(0,Math.floor((p.x-G.L)/G.cw)));
+    let db=Math.round(((p.y-G.T)*130/(G.B-G.T)-10)/5)*5;db=Math.min(120,Math.max(-10,db));
+    const m=MODES[S.d[q.id+'-mode']||0];const arr=P[m[0]][m[1]];arr[i]=arr[i]===db?N:db;save();fill(el,q)});
+  const c=el.querySelector('[data-check]');if(c)c.onclick=()=>{let sc=0;['R','L'].forEach(e=>['air','bone'].forEach(t=>E[e][t].forEach((v,i)=>{if(v!=null&&P[e][t][i]===v)sc++})));S.r[q.id]={score:sc};fill(el,q)};
+  const cl=el.querySelector('[data-clear]');if(cl)cl.onclick=()=>{S.p[q.id]=blank();save();fill(el,q)};
+  const sh=el.querySelector('[data-show]');if(sh)sh.onclick=()=>{S.d[q.id+'-show']=!S.d[q.id+'-show'];save();fill(el,q)};
+  const rt=el.querySelector('[data-retry]');if(rt)rt.onclick=()=>{delete S.r[q.id];S.d[q.id+'-show']=false;fill(el,q);done(el,q)};
+}
+
+/* ---------- reference card ---------- */
+const REF=`<div class="refgrid"><div style="min-width:0"><h3>How to read an audiogram</h3><ul>
+<li>The x-axis is frequency (pitch), from low (250 Hz) on the left to high (8,000 Hz) on the right.</li>
+<li>The y-axis is hearing level in decibels. 0 dB is at the top. A lower mark means a louder sound was needed, so there is more hearing loss.</li>
+<li>Air conduction: right ear = red <b class="sw R">O</b>, left ear = blue <b class="sw L">X</b>. Bone conduction: right = <b class="sw R">&lt;</b>, left = <b class="sw L">&gt;</b>.</li>
+<li><b>Conductive loss:</b> bone conduction is at least 10 dB better than air conduction (the air–bone gap). The problem is in the outer or middle ear.</li>
+<li><b>Sensorineural loss:</b> air and bone are both reduced and about equal. The problem is in the cochlea or auditory nerve.</li></ul></div>
+<div style="min-width:0"><h3>Degree of hearing loss</h3><div class="tbl"><table><tbody>
+<tr><td>No hearing loss</td><td class="num">0–20 dB</td></tr><tr><td>Mild</td><td class="num">21–40 dB</td></tr><tr><td>Moderate</td><td class="num">41–55 dB</td></tr>
+<tr><td>Moderate to severe</td><td class="num">56–70 dB</td></tr><tr><td>Severe</td><td class="num">71–90 dB</td></tr><tr><td>Profound</td><td class="num">&gt;90 dB</td></tr></tbody></table></div></div></div>`;
+
+/* ---------- sound explorer ---------- */
+const EXPLORE=`<div class="explore"><div class="wavebox"><svg viewBox="0 0 700 180" id="wv" role="img" aria-label="Sound wave preview"><line x1="0" x2="700" y1="90" y2="90" stroke="var(--grid)" stroke-dasharray="4 4"/><polyline id="wvl" fill="none" stroke="var(--accent)" stroke-width="2.5"/></svg></div>
+<div class="sliders"><label for="ex-f">Frequency <output id="ex-fo"></output><input type="range" id="ex-f" min="200" max="1000" step="50" value="400"></label>
+<label for="ex-a">Amplitude <output id="ex-ao"></output><input type="range" id="ex-a" min="10" max="100" step="5" value="40"></label></div>
+<div class="readout"><span class="pill" id="ex-p"></span><span class="pill" id="ex-l"></span></div>
+<div class="row" style="margin-top:0"><button class="btn" id="ex-play">Play tone</button><span class="note">Plays for 1.5 seconds.</span></div></div>`;
+let actx=null;
+function wireExplore(el){const f=el.querySelector('#ex-f'),a=el.querySelector('#ex-a'),line=el.querySelector('#wvl');
+  const draw=()=>{const fr=+f.value,am=+a.value,cyc=fr/100;line.setAttribute('points',Array.from({length:351},(_,i)=>`${i*2},${(90-am*.75*Math.sin(i/350*cyc*2*Math.PI)).toFixed(1)}`).join(' '));
+    el.querySelector('#ex-fo').textContent=fr+' Hz';el.querySelector('#ex-ao').textContent=am+'%';
+    el.querySelector('#ex-p').textContent='Pitch: '+(fr<450?'low':fr<750?'medium':'high');el.querySelector('#ex-l').textContent='Loudness: '+(am<40?'quiet':am<75?'moderate':'loud')};
+  f.oninput=a.oninput=draw;draw();
+  el.querySelector('#ex-play').onclick=()=>{try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();const o=actx.createOscillator(),g=actx.createGain(),t=actx.currentTime,peak=(+a.value/100)*.18;
+    o.frequency.value=+f.value;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(peak,t+.05);g.gain.setValueAtTime(peak,t+1.4);g.gain.linearRampToValueAtTime(0,t+1.5);o.connect(g).connect(actx.destination);o.start(t);o.stop(t+1.55)}catch(e){}}}
+
+/* ---------- results ---------- */
+function renderResults(m){
+  m.insertAdjacentHTML('beforeend',`<div class="lthead"><div class="eyebrow">Report</div><h2>My results</h2><p>Rate yourself on each learning target, then copy your report into Google Classroom if your teacher asks for it.</p></div>`);
+  const wrap=document.createElement('div');wrap.className='res';m.appendChild(wrap);
+  wrap.insertAdjacentHTML('beforeend',`<div class="rescard"><label for="nm" style="font:700 15px var(--f-display)">Your name</label><div class="row" style="margin-top:6px"><input type="text" id="nm" value="${esc(S.name)}" placeholder="First and last name" style="width:280px"></div></div>`);
+  LT.forEach((lt,li)=>{const rt=S.rate[lt.key]||{};
+    wrap.insertAdjacentHTML('beforeend',`<div class="rescard"><div class="eyebrow">LT${li+1}</div><h3>${lt.title}</h3>${[0,1,2].map(v=>{const x=lvScore(li,v);return `<div class="lvrow"><span>${LVN[v]}</span><span class="meter"><i style="width:${(x.s/x.m*100).toFixed(0)}%"></i></span><span class="sc">${x.s}/${x.m}</span></div>`}).join('')}
+    <div class="rates">${['before','after'].map(k=>`<label for="rt-${lt.key}-${k}">Self-rating ${k}<select id="rt-${lt.key}-${k}" data-lt="${lt.key}" data-k="${k}"><option value="">–</option>${['1 · Not yet','2 · Getting there','3 · I’ve got it','4 · I could teach it'].map((o,i)=>`<option value="${i+1}" ${rt[k]==i+1?'selected':''}>${o}</option>`).join('')}</select></label>`).join('')}</div></div>`)});
+  wrap.insertAdjacentHTML('beforeend',`<div class="rescard"><h3>Report</h3><pre class="out" id="out"></pre><div class="row"><button class="btn" id="cp">Copy report</button><span class="note" id="cpm"></span></div>
+   <div class="row" style="margin-top:20px"><button class="btn ghost" id="rs">Start over</button><span class="note" id="rsm"></span></div></div>`);
+  const out=()=>{let t=`Good Vibrations Review (MI 1.3.1–1.3.2)\nName: ${S.name||'—'}\n`;LT.forEach((lt,li)=>{const rt=S.rate[lt.key]||{};t+=`\nLT${li+1} ${lt.title}\n`+[0,1,2].map(v=>{const x=lvScore(li,v);return `  ${LVN[v]}: ${x.s}/${x.m} points (${x.done}/${x.tot} questions done)`}).join('\n')+`\n  Self-rating: before ${rt.before||'–'}, after ${rt.after||'–'}\n`});return t};
+  const upd=()=>{m.querySelector('#out').textContent=out()};upd();
+  m.querySelector('#nm').oninput=e=>{S.name=e.target.value;save();upd()};
+  m.querySelectorAll('.rates select').forEach(s=>s.onchange=()=>{const k=s.dataset.lt;S.rate[k]=S.rate[k]||{};S.rate[k][s.dataset.k]=s.value;save();upd()});
+  m.querySelector('#cp').onclick=()=>{const t=out(),msg=m.querySelector('#cpm');const sel=()=>{const r=document.createRange();r.selectNodeContents(m.querySelector('#out'));const s=getSelection();s.removeAllRanges();s.addRange(r);msg.textContent='Selected. Press Ctrl+C to copy.'};
+    try{navigator.clipboard.writeText(t).then(()=>msg.textContent='Copied.',sel)}catch(e){sel()}};
+  let armed=false;m.querySelector('#rs').onclick=e=>{if(!armed){armed=true;e.target.textContent='Click again to erase all answers';m.querySelector('#rsm').textContent='This clears every answer saved on this device.';return}
+    S={r:{},d:{},t:{},o:{},p:{},rev:{},rate:{},name:'',view:'lt1',lvl:{}};save();render()};
+}
+
+/* ---------- boot ---------- */
+const h=(location.hash||'').slice(1);if(['lt1','lt2','lt3','results'].includes(h))S.view=h;
+render();
+</script>
+
+</body>
+</html>
